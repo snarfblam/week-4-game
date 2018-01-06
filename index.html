@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="assets/css/reset.css">
@@ -7,8 +8,66 @@
     <script src="assets/javascript/game.js"></script>
     <title>Star Wars</title>
 </head>
+
 <body>
-    
-    <div>a</div>
+    <img class="deathstarDecoration" src="assets/images/deathstar.png">
+    <div class="mainContainer">
+        <h1 class="title">Star Wars RPG</h1>
+        <hr>
+        <div id="heroContainer">
+            <h3 id="heroLabel">Select your hero.</h3>
+            <div class="avatar">
+                <p class="avatarLabel">Boba Fett</p>
+                <img src="assets/images/avatarFett.jpg">
+                <p class="hpDisplay">HP:
+                    <span class="hpValue">0</span>
+                </p>
+            </div>
+            <div class="avatar">
+                <p class="avatarLabel">Han Solo</p>
+                <img src="assets/images/avatarSolo.jpg">
+                <p class="hpDisplay">HP:
+                    <span class="hpValue">0</span>
+                </p>
+            </div>
+            <div class="avatar">
+                <p class="avatarLabel">Darth Vader</p>
+                <img src="assets/images/avatarVader.png">
+                <p class="hpDisplay">HP:
+                    <span class="hpValue">0</span>
+                </p>
+            </div>
+            <div class="avatar">
+                <p class="avatarLabel">Yoda</p>
+                <img src="assets/images/avatarYoda.png">
+                <p class="hpDisplay">HP:
+                    <span class="hpValue">0</span>
+                </p>
+            </div>
+            <p id="versus">VS.</p>
+            <div id="opponentBox">
+                <!-- Placeholder for active opponent -->
+            </div>
+            <br>
+            <button id="attackButton">Attack</button>
+        </div>
+        <div id="foes">
+            <h3 id="foeLabel">Select a foe.</h3>
+            <!-- (placeholder for design) -->
+            <!-- <div class="avatar">
+                <p class="avatarLabel">Yoda</p>
+                <img src="assets/images/avatarYoda.png">
+                <p class="hpDisplay">HP:
+                    <span class="hpValue">0</span>
+                </p>
+            </div> -->
+        </div>
+        <div id="outputBox">
+            <p class="outputItem">A thing happened because you did stuff. Also I put a lot of words in here so that I can see what happens if a
+                line is too long to fit onto the screen and if it wraps the way that I would like it to wrap.</p>
+        </div>
+    </div>
+    <!--mainContainer-->
 </body>
+
 </html>

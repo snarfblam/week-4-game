@@ -1,12 +1,136 @@
+@import url('https://fonts.googleapis.com/css?family=Orbitron');
+
 html {
     height: 100%;
-}
-
-body {
+    font-family: Orbitron;
     background: url("../images/Sky.png");
     background-size: auto 100%;
     background-repeat: repeat-x;
-    background-position: bottom 0px;
     background-origin: border-box;
+}
+
+body {
     height: 100%;
+    /* max-width: 800px; */
+    /* margin: 0 auto; */
+    position: relative;
+    color: white;
+    /* padding: 10px; */
+    font-family: Orbitron;
+}
+
+.mainContainer {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.title {
+    color: orange;
+    margin: 0 auto;
+    text-align: center;
+    font-weight: bold;
+}
+
+hr {
+    border-color: orange;
+    width: 500px;
+}
+
+h1 {
+    font-size: 3rem;
+}
+
+h3 {
+    font-size: 2rem;
+}
+
+#heroLabel, #foeLabel {
+    padding-top: 20px;
+    padding-bottom: 10px;
+}
+
+.hpDisplay, .avatarLabel {
+    background: white;
+    color: black;
+    text-align: center;
+    padding-bottom: 5px;
+    font-weight: bold;
+}
+
+#versus {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 2em;
+    transform: translateY(-75px); 
+    padding-left: 20px;
+    padding-right: 20px;
+    background: black;
+    border-radius: 10px;
+}
+
+.hpDisplay {
+    padding-bottom: 5px;
+}
+
+.hpDisplay, .avatarLabel {
+    padding-top: 5px;
+}
+
+.avatar, #opponentBox {
+
+    display: inline-block;
+    padding: 5px;
+
+}
+
+.avatar img, #opponentBox img {
+    width: 150px;
+    height: 150px;
+    padding: 5px;
+    border: 4px white solid;
+    outline: 5px black solid;
+    outline-offset: -9px;
+    box-sizing: border-box;
+    overflow: visible;
+    display: block;
+}
+
+#foes {
+    margin-top: 2rem;
+}
+
+.deathstarDecoration {
+    position: absolute;
+    right: 50px;
+    top: 100px;
+    z-index: -1;
+}
+
+button {
+    background: white;
+    color: black;
+    padding: 10px;
+    border: 1px white solid;
+    outline: 2px black solid;
+    outline-offset: -5px;
+    font-family: inherit;
+    font-size: 1.5rem;
+}
+
+#attackButton {
+    margin-left: 30px;
+    margin-top: 10px;
+}
+
+.outputItem {
+    background: rgba(24, 24, 24, 0.75);
+    color: orange;
+    border: 1px black;
+    border-radius: 5px;
+    padding: 5px;
+    /* white-space: nowrap; */
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    line-height: 1.5em;
 }
