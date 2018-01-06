@@ -1,0 +1,12 @@
+html {
+    height: 100%;
+}
+
+body {
+    background: url("../images/Sky.png");
+    background-size: auto 100%;
+    background-repeat: repeat-x;
+    background-position: bottom 0px;
+    background-origin: border-box;
+    height: 100%;
+}
