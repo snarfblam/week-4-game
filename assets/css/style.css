@@ -95,7 +95,7 @@ h3 {
     display: block;
 }
 
-#foes {
+#foeContainer {
     margin-top: 2rem;
 }
 
@@ -120,6 +120,13 @@ button {
 #attackButton {
     margin-left: 30px;
     margin-top: 10px;
+    cursor: pointer;
+}
+#attackButton:hover {
+    background: rgb(255, 224, 166);
+}
+#attackButton:active {
+    background: orange;
 }
 
 .outputItem {
@@ -133,4 +140,8 @@ button {
     box-sizing: border-box;
     overflow: hidden;
     line-height: 1.5em;
+}
+
+.clickableItem {
+    cursor: pointer;
 }
