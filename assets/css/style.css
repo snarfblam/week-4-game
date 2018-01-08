@@ -5,7 +5,7 @@ html {
     font-family: Orbitron;
     background: url("../images/Sky.png");
     background-size: auto 100%;
-    background-repeat: repeat-x;
+    background-repeat: repeat;
     background-origin: border-box;
 }
 
@@ -45,8 +45,13 @@ h3 {
 }
 
 #heroLabel, #foeLabel {
-    padding-top: 20px;
+    /* padding-top: 20px;  */
     padding-bottom: 10px;
+}
+
+#heroContainer, #foeContainer {
+    padding-top: 20px;
+    text-align: center;
 }
 
 .hpDisplay, .avatarLabel {
@@ -58,16 +63,26 @@ h3 {
 }
 
 #versus {
-    display: inline-block;
+    /* display: inline-block; */
+    text-align: center;
     vertical-align: middle;
     line-height: 2em;
-    transform: translateY(-75px); 
+    /* transform: translateY(-75px);  */
     padding-left: 20px;
     padding-right: 20px;
     background: black;
     border-radius: 10px;
+    margin-bottom: 40px;
 }
 
+
+
+.versusPane {
+    display: inline-block;
+    margin-bottom: 20px;
+    /* This prevents the div from being positioned based on the base-line text of the button: */
+    overflow: hidden;
+}
 .hpDisplay {
     padding-bottom: 5px;
 }
@@ -80,8 +95,8 @@ h3 {
 
     display: inline-block;
     padding: 5px;
-
 }
+
 
 .avatar img, #opponentBox img {
     width: 150px;
@@ -95,8 +110,38 @@ h3 {
     display: block;
 }
 
+
+.dead img, #opponentBox .dead img {
+    border: 4px solid red;
+}
+
+.dead p {
+    background: red;
+}
+
+#deadCharacterBench {
+    display: none;
+}
+/* .gone {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    transition: width 2s, height 2s;
+} */
+
+
+
+.avatar .avatarHead, #opponentBox .avatarHead {
+    display: none;
+}
+
+.outputItem img {
+    vertical-align: bottom;
+    height: 24px; 
+}
+
 #foeContainer {
-    margin-top: 2rem;
+    margin-top: 0; /* 2rem; */
 }
 
 .deathstarDecoration {
@@ -118,9 +163,13 @@ button {
 }
 
 #attackButton {
-    margin-left: 30px;
+    /* margin-left: 30px; */
     margin-top: 10px;
     cursor: pointer;
+}
+#attackButton:disabled {
+    cursor: default;
+    color: gray;
 }
 #attackButton:hover {
     background: rgb(255, 224, 166);
@@ -140,8 +189,15 @@ button {
     box-sizing: border-box;
     overflow: hidden;
     line-height: 1.5em;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    box-sizing: border-box;
 }
 
 .clickableItem {
     cursor: pointer;
+}
+
+.hiddenItem {
+    display: none !important;
 }

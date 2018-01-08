@@ -15,70 +15,383 @@ $(document).ready(function () {
         /** Button player clicks to attack his foe */
         uiAttackButton: $("#attackButton"),
         /** Box where output messages are displayed */
-        uiOutputBox: $("outputBox"),
+        uiOutputBox: $("#outputBox"),
+        uiDeadCharacterBench: $("#deadCharacterBench"),
 
         /** Contains all avatar elements, including player, and foes, hidden or shown */
         uiAvatars: $(".avatar"),
 
+        maxMessageCount: 5,
+
         gameStatus: {
             selectedCharacter: null,
+            activeFoe: null,
             allFoes: [],
             livingFoes: [],
-            deadFoes:[],
+            deadFoes: [],
 
         },
         currentGameState: null,
-        gameStates: {},
+        gameStates: {
+            selectAvatar: {
+                clickableElements: ".avatar",
+                hiddenElements: "#versus #attackButton #foeLabel",
+                onEnter: function(state) {
+                    //state.game.uiVersus.addClass("hiddenItem");
+                    state.displayMessage("Welcome to Starwars RPG!");
+                    state.displayMessage("Click a character to play as.");
+                },
+                onClick: function (state, e) {
+                    // Clicked avatar becomes player's character
+                    state.game.setSelectedAvatar(this);
+                    state.moveToState("selectOpponent");
 
+                },
+            },
+            selectOpponent: {
+                clickableElements: ".foe",
+                hiddenElements: "#versus #attackButton #heroLabel",
+                onEnter: function(state) {
+                    state.displayMessage("Select your opponent");
+                },
+                onClick: function (state, e) {
+                    state.game.setSelectedOpponent(this);
+                    state.moveToState("waitForAttack");
+                }
+            },
+            waitForAttack: {
+                handlingClick: false, // Used in onClick method
+                clickableElements: "#attackButton",
+                hiddenElements: "#heroLabel",
+                onEnter: function(state) {
+                    state.displayMessage('"' + state.status.activeFoe.fightCall + '"', state.status.activeFoe);
+                    state.displayMessage("Attack your opponent!");
+                    state.handlingClick = false;
+                },
+                onClick: function (state, e) {
+                    // This handler uses a timeout. Don't re-enter before the time-out completes.
+                    if(state.handlingClick) return;
+
+                    // Fighting happens!
+
+                    // Player strikes
+                    var attack = state.status.selectedCharacter.attack;
+                    state.status.activeFoe.hp -= attack;
+                    // Increase attack power
+                    state.status.selectedCharacter.attack += state.status.selectedCharacter.baseAttack;
+                    // Don't let foe HP go negative
+                    if(state.status.activeFoe.hp < 0) state.status.activeFoe.hp = 0;
+                    // Update foe's HP text
+                    state.status.activeFoe.updateHpDisplay();
+                    // Tell it!
+                    var message = state.status.selectedCharacter.name + " attacks! " + state.status.activeFoe.name + " loses " + attack + " HP!";
+                    state.displayMessage(message);
+
+                    var foeDefeated = state.status.activeFoe.hp == 0;
+                    setTimeout(function(){
+                        if(foeDefeated) {
+                            // alert("ded");
+                            // something
+                            state.status.activeFoe.jqElement.addClass("dead");
+                            state.displayMessage(state.status.activeFoe.name + " has been defeated!");
+                            state.moveToState("opponentDying");
+                        } else { 
+                            // Foe strikes
+                            var counterAttack = state.status.activeFoe.counterAttack;
+                            state.status.selectedCharacter.hp -= counterAttack;
+                            // Don't let HP go negative
+                            if(state.status.selectedCharacter.hp < 0) state.status.selectedCharacter.hp = 0;
+                            // Update HP text
+                            state.status.selectedCharacter.updateHpDisplay();
+                            // Tell it!
+                            var counterMessage = state.status.activeFoe.name + " attacks! " + state.status.selectedCharacter.name + " loses " + counterAttack + " HP!";
+                            state.displayMessage(counterMessage);
+
+                            if(state.status.selectedCharacter.hp == 0){
+                                state.status.selectedCharacter.jqElement.addClass("dead");
+                                state.displayMessage(state.status.selectedCharacter.name + " has perished!");
+                                state.displayMessage("Game over.");
+                                state.moveToState("gameOver");
+                            }
+                        }
+                        state.handlingClick = false;
+                    }, 300);
+
+
+                }
+                
+            },
+            gameOver: {
+                clickableElements: "",
+                hiddenElements: "#heroLabel",
+                onEnter: function (){
+                    // todo: display message with link to restart game
+                },
+                onClick: function (){},
+            },
+            gameWon: {
+                clickableElements: "",
+                hiddenElements: "#heroLabel #attackButton #versus #foeLabel",
+                onEnter: function (){
+                    // todo: display message with link to restart game
+                },
+                onClick: function (){},
+            },
+            opponentDying: {
+                clickableElements: "",
+                hiddenElements: "#heroLabel",
+                onEnter: function(state) {
+                    //state.displayMessage("Select your opponent");
+                    setTimeout(function(){
+                        state.game.removeActiveFoe(function () {
+                            if(state.status.livingFoes.length > 0) {
+                                state.moveToState("selectOpponent");
+                            } else {
+                                state.displayMessage("You've defeated all opponents. GREAT SUCCESS!");
+                                state.moveToState("gameWon");
+                            }
+                        });
+                    }, 500);
+                },
+                onClick: function (state, e) {
+                }
+            },
+        },
+
+        selectedCharacter: null,
+        /** @type {CharacterObj[]} */
         characters: [],
         clickableElements: [],
+        hiddenElements: [],
+        messages: [],
 
-        initGame: function() {
+        initGame: function () {
             // Create character objects
-            this.characters.push(new this.Character(0, 5, 5, 120));
-            this.characters.push(new this.Character(1, 4, 8, 100));
-            this.characters.push(new this.Character(2, 3, 12, 150));
-            this.characters.push(new this.Character(3, 6, 17, 180));
+            this.characters.push(new this.Character(0, 10, 5, 80)); // fett
+            this.characters.push(new this.Character(1, 4, 8, 100)); // solo
+            this.characters.push(new this.Character(2, 3, 12, 150)); // vader
+            this.characters.push(new this.Character(3, 6, 15, 180)); // yoda
 
             this.initStates();
             //var gs = new this.GameState("#versus .avatar");
-            this.setCurrentGameState(this.testGameState);
+            this.setCurrentGameState(this.gameStates.selectAvatar);
         },
 
-        initStates: function() {
-            var that = this;
-            addGameState(this.testGameState);
+        /** @typedef {object} GameState
+         * @property {string} name - Name of the state
+         * @property {string} clickableElements - A space-separated list of #ids and/or .classes for which the game state handles click events
+         * @property {function(GameState, MouseEvent)} onClick - called when the state's clickable elements are clicked
+         * @property {function(GameState)} onEnter - Called when the the game state is transitioned to
+         * @property {function(GameState)} onLeave - Called immediately before the game state is transitioned away from
+         * @property {Object} status - rpgGame.gameStatus object
+         */
 
-            function addGameState(state) {
-                state.moveToState = setNextState;
-                that.gameStates[state.name] = state;
+        initStates: function () {
+            
+            var self = this;
+
+            // Iterate over game states
+            Object.getOwnPropertyNames(this.gameStates).forEach(function(stateName){
+                var state = this.gameStates[stateName];
+                
+                 // Assign additional properties not defined above
+                 state.name = stateName;
+                 state.game = this;
+                 // functions
+                 state.moveToState = setNextState;
+                 state.displayMessage = displayMessage;
+                 state.status = self.gameStatus;
+                 //state.shrinkCharacter = shrinkCharacter;
+                 //state.growCharacter = growCharacter;
+            }, this); 
+
+            /** Member function to be added to GameState objects. Advances the game to the specified state. */
+            function setNextState(strState) {
+                self.setCurrentGameState(self.gameStates[strState]);
             }
 
-            function setNextState(strState){
-                that.setCurrentGameState(that.gameStates[strState]);
+            function displayMessage(msg, character) {
+                self.displayMessage(msg, character);
             }
+            
+
         },
 
+        removeActiveFoe: function(callback) {
+            var self = this;
 
-        Character: function(index, baseAttack, counterAttack, initialHp) {
+            this.animateCharToElement(this.gameStatus.activeFoe, this.uiDeadCharacterBench, function() {
+                // Move foe from living foes to dead foes
+                var iFoe = self.gameStatus.livingFoes.indexOf(self.gameStatus.activeFoe);
+                self.gameStatus.livingFoes.splice(iFoe, 1);
+                self.gameStatus.deadFoes.push(self.gameStatus.activeFoe);
+
+                self.gameStatus.activeFoe = null;
+                if(callback) callback();
+            });
+        },
+
+        shrinkCharacter: function (char, callback) {
+            var element = char.jqElement;
+            // Cache original size so we can grow back to that
+            char.autoWidth = element.width();
+            char.autoHeight = element.height();
+            element.animate({width: 0, height: 0}, 200, callback);
+        },
+        growCharacter: function (char, callback) {
+            char.jqElement.animate({width: char.autoWidth + "px", height: char.autoHeight + "px"}, 200, callback);
+        },
+        /** @typedef {Object} CharacterObj 
+         * @prop {number} index - Index of the character in the rpgGame.characters array
+         * @prop {number} baseAttack - player's base attack, i.e. starting attack and amount added to attack power after each attack
+         * @prop {number} counterAttack - enemy's attack power
+         * @prop {number} initialHp - Starting value for character's HP
+         * @prop {number} attack - player's current attack power
+         * @prop {number} hp - character's current health
+         * @prop {number} [autoWidth] - Optional. Specifies the size of a character's element in pixels immediately prior to a shrink operation
+         * @prop {number} [autoHeight] - Optional. Specifies the size of a character's element in pixels immediately prior to a shrink operation
+         * @prop {string} name - character's name
+         * @prop {HTMLElement} element - HTML element representing the character
+         * @prop {JQuery<HTMLElement>} jqElement - JQuery object representing this.element
+         * @prop {JQuery<HTMLElement>} hpDisplay - JQuery object representing the character's HP display
+         * @prop {string} fightCall - Text to be displayed when this character is fought as a foe
+         * @prop {Function} reset - Resets this object's stats to their initial state
+         * @prop {Function} updateHpDisplay - Update's the HP text on the page
+         */
+        /** Creates a new Character object, which represents character stats and references html the relevant html element 
+         * @returns {CharacterObj}
+        */
+        Character: function (index, baseAttack, counterAttack, initialHp) {
             this.index = index;
             this.baseAttack = baseAttack;
             this.counterAttack = counterAttack;
             this.initialHp = initialHp;
             this.element = rpgGame.uiAvatars[index];
+            this.jqElement = $(this.element);
+            this.hpDisplay = this.jqElement.find(".hpValue");
+            this.name = this.jqElement.find(".avatarLabel").text();
+            this.attack = 0;
+            this.hp = 0;
+            this.fightCall = this.jqElement.data("fightcall");
 
-            this.reset = function() {
+            this.reset = function () {
                 this.attack = this.baseAttack;
                 this.hp = this.initialHp;
             };
-            this.isDead = function() {
+            this.isDead = function () {
                 return this.hp >= 0;
             };
-            this.hpDisplayString = function() {
+            this.hpDisplayString = function () {
                 return this.isDead() ? "0" : this.hp.toString();
             }
+            this.updateHpDisplay = function() {
+                this.hpDisplay.text(this.hp + " HP");
+            }
+            
+
+            this.reset();
+            this.updateHpDisplay();
+            return this;
         },
 
+        setSelectedAvatar: function (avatarElement, callback) {
+            this.gameStatus.allFoes.length = 0;
+            this.gameStatus.livingFoes.length = 0;
+            this.gameStatus.deadFoes.length = 0;
+            this.selectedCharacter = null;
+
+            // Add/remove the .foe class as applicable
+            for (var i = 0; i < this.characters.length; i++) {
+                if(this.characters[i].element == avatarElement) {
+                    this.selectedCharacter = this.characters[i];
+                    this.gameStatus.selectedCharacter = this.selectedCharacter;
+                    this.selectedCharacter.jqElement.removeClass("foe");
+                } else {
+                    this.gameStatus.livingFoes.push(this.characters[i]);
+                    this.gameStatus.allFoes.push(this.characters[i]);
+                    this.characters[i].jqElement.addClass("foe");
+                }
+            }
+
+            if(!this.selectedCharacter) throw("Specified element not found in character list");
+            var first = true;
+
+            this.gameStatus.allFoes.forEach(function (foe) {
+                // We'll pass our callback to the first animation
+                this.animateCharToElement(foe, this.uiFoeContainer, first ? callback : undefined);
+                first = false;
+            }, this);
+
+        },
+
+        setSelectedOpponent: function (avatarElement, callback) {
+            this.gameStatus.activeFoe = this.getCharacterByElement(avatarElement);
+            this.animateCharToElement(this.gameStatus.activeFoe, this.uiOpponentBox, callback);
+        },
+
+        getCharacterByElement: function(element) {
+            if(element instanceof jQuery) element = element[0];
+
+            for (var i = 0; i < this.characters.length; i++) {
+                if(this.characters[i].element == element) {
+                    return this.characters[i];
+                }
+            }
+
+            return undefined;
+        },
+
+        /** Moves the specified character to the specified element with an animation 
+         * @param {CharacterObj} char - The character to be moved
+         * @param {any} element - The element to move the character to (HTMLElement or jQuery)
+         * @param {Function} [callback] - optional callback for when the animation is complete
+        */
+        animateCharToElement: function (char, element, callback) {
+            var self = this;
+
+            // If specified element is jQuery object, get the native HTMLElement
+            if(!(element instanceof jQuery)) element = $(element);
+
+            // First shrink
+            this.shrinkCharacter(char, function() {
+                // Then move
+                element.append(char.element);
+                // And finally grow
+                self.growCharacter(char, callback);
+            });
+        },
+
+        displayMessage: function(msg, character){
+            var self = this;
+            var newImage = null;
+
+            if(character){
+                var src = character.jqElement.find(".avatarHead").attr("src");
+                newImage = $("<img>").attr("src", src)
+            }
+
+            var newMessage = $("<div class='outputItem'>")
+            newMessage.text(" " + msg);
+            if(newImage) newMessage.prepend(newImage);
+            newMessage.css("opacity", 0);
+            this.uiOutputBox.append(newMessage);
+            this.messages.push(newMessage);
+            newMessage.animate({opacity: 1}, 250); //, 
+                // function() {
+                // self.cullMessages()}
+                // );
+            self.cullMessages();
+        },
+
+        cullMessages: function() {
+            if(this.messages.length > this.maxMessageCount) {
+                var msg = this.messages[0];
+                this.messages.shift();
+                msg.animate({height: 0, margin: 0, padding: 0}, 100, function() {
+                    msg.remove();
+                });
+            }
+        },
         // /** Creates a game state objects
         //  *  @constructor
         //  *  @param {string} clickableElements - A space-separated list of .classes or #ids that will raise the click event 
@@ -86,54 +399,81 @@ $(document).ready(function () {
         // GameState: function(clickableElements, onClick) {
         //     //@ts-ignore -- this refers to a GameState
         //     this.clickableElements = clickableElements;
-            
+
         // },
 
         // testGameState: new this.GameState(".avatar"), 
-        testGameState: {
-            name: "testGameState",
-            clickableElements: ".avatar",
-            onClick: function(e){
-                // todo: oops... no way to reference this object. 'this' refers to the element clicked. Add 'state' parameter?
-            },
-        },
-        testGameState2: {
-            name: "testGameState2",
-            clickableElements: "#versus",
-            onClick: function(e) {
-                alert("versus");
+        // Todo: put all these directly into the gamestate object, and have the gamestate init function just add methods (and whatever else it may end up doing)
+
+
+        setCurrentGameState: function (state) {
+            if(this.currentGameState) {
+                if(this.currentGameState.onLeave) this.currentGameState.onLeave(this.currentGameState);
+            }
+
+            this.currentGameState = state;
+            if(this.currentGameState) {
+                this.setClickableElements(state.clickableElements || "");
+                this.setHiddenElements(state.hiddenElements || "");
+                if(this.currentGameState.onEnter) this.currentGameState.onEnter(this.currentGameState);
+            }else{
+                this.setClickableElements(""); // none
             }
         },
 
-        setCurrentGameState: function(state){
-            this.currentGameState = state;
-            this.setClickableElements(state.clickableElements);
+        setHiddenElements: function (elements) {
+       var that = this;
+
+            // Remove clickable items
+            this.hiddenElements.forEach(function (i) {
+                i.removeClass("hiddenItem");
+            });
+            this.hiddenElements.length = 0;
+
+            // Split elements into array
+            var elementArray = elements.split(" ");
+            // Remove blank entries
+            elementArray = elementArray.filter(function (i) { return i; });
+
+            elementArray.forEach(function (e) {
+                var elem = $(e);
+                elem.addClass("hiddenItem");
+                that.hiddenElements.push(elem);
+            });
+
         },
 
-        setClickableElements: function(elements) {
+        setClickableElements: function (elements) {
             var that = this;
 
             // Remove clickable items
-            this.clickableElements.forEach(function(i){
-                i.off("click", clickHandler);
-                i.removeClass(".clickableItem");
+            this.clickableElements.forEach(function (i) {
+                // Disable buttons
+                i.prop("disabled", true);
+                // Remove click handlers
+                i.off("click");
+                // Remove clickable style
+                i.removeClass("clickableItem");
             });
             this.clickableElements.length = 0;
 
             // Split elements into array
             var elementArray = elements.split(" ");
             // Remove blank entries
-            elementArray = elementArray.filter(function(i){return i;});
+            elementArray = elementArray.filter(function (i) { return i; });
 
-            elementArray.forEach(function(e){
+            elementArray.forEach(function (e) {
                 var elem = $(e);
                 elem.on("click", clickHandler);
                 elem.addClass("clickableItem");
+                elem.prop("disabled", false);
                 that.clickableElements.push(elem);
             });
 
             function clickHandler(e) {
-                that.currentGameState.onClick.call(this, e);
+                if (that.currentGameState.onClick) {
+                    that.currentGameState.onClick.call(this, that.currentGameState, e);
+                }
             }
         },
 
