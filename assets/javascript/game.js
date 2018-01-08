@@ -116,24 +116,21 @@ $(document).ready(function () {
                         }
                         state.handlingClick = false;
                     }, 300);
-
-
                 }
-                
             },
             gameOver: {
                 clickableElements: "",
                 hiddenElements: "#heroLabel",
-                onEnter: function (){
-                    // todo: display message with link to restart game
+                onEnter: function (state){
+                    state.displayMessage("newgame");
                 },
                 onClick: function (){},
             },
             gameWon: {
                 clickableElements: "",
                 hiddenElements: "#heroLabel #attackButton #versus #foeLabel",
-                onEnter: function (){
-                    // todo: display message with link to restart game
+                onEnter: function (state){
+                    state.displayMessage("newgame");
                 },
                 onClick: function (){},
             },
@@ -361,6 +358,10 @@ $(document).ready(function () {
             });
         },
 
+        /** Displays a message in the game's output window
+         * @param {string} msg - The message to display, or "newgame" to display a link that can be clicked to start a new game
+         * @param {CharacterObj} character - A character whose image is to be displayed next to the txt, or null
+         */
         displayMessage: function(msg, character){
             var self = this;
             var newImage = null;
@@ -371,7 +372,17 @@ $(document).ready(function () {
             }
 
             var newMessage = $("<div class='outputItem'>")
-            newMessage.text(" " + msg);
+            if(msg == "newgame") {
+                var link = $("<a href='#'>");
+                link.text("Click to play again.");
+                link.on("click", function(){
+                    self.newGame();
+                });
+                newMessage.append(link);
+            } else {
+                newMessage.text(" " + msg);
+            }
+
             if(newImage) newMessage.prepend(newImage);
             newMessage.css("opacity", 0);
             this.uiOutputBox.append(newMessage);
