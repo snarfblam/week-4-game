@@ -21,8 +21,10 @@ $(document).ready(function () {
         /** Contains all avatar elements, including player, and foes, hidden or shown */
         uiAvatars: $(".avatar"),
 
+        /** Constant. Maximum number of status messages to show to the user. Old messages will be removed. */
         maxMessageCount: 5,
 
+        /** Game status. Identifies which characters are foes and which are living and dead. */
         gameStatus: {
             selectedCharacter: null,
             activeFoe: null,
@@ -31,12 +33,14 @@ $(document).ready(function () {
             deadFoes: [],
 
         },
+        /** Current game state. */
         currentGameState: null,
+        /** Collection of all game states, each of which defines which elements are clickable, visible, and provides event handlers. */
         gameStates: {
             selectAvatar: {
                 clickableElements: ".avatar",
                 hiddenElements: "#versus #attackButton #foeLabel",
-                onEnter: function(state) {
+                onEnter: function (state) {
                     //state.game.uiVersus.addClass("hiddenItem");
                     state.displayMessage("Welcome to Starwars RPG!");
                     state.displayMessage("Click a character to play as.");
@@ -51,7 +55,7 @@ $(document).ready(function () {
             selectOpponent: {
                 clickableElements: ".foe",
                 hiddenElements: "#versus #attackButton #heroLabel",
-                onEnter: function(state) {
+                onEnter: function (state) {
                     state.displayMessage("Select your opponent");
                 },
                 onClick: function (state, e) {
@@ -63,14 +67,14 @@ $(document).ready(function () {
                 handlingClick: false, // Used in onClick method
                 clickableElements: "#attackButton",
                 hiddenElements: "#heroLabel",
-                onEnter: function(state) {
+                onEnter: function (state) {
                     state.displayMessage('"' + state.status.activeFoe.fightCall + '"', state.status.activeFoe);
                     state.displayMessage("Attack your opponent!");
                     state.handlingClick = false;
                 },
                 onClick: function (state, e) {
                     // This handler uses a timeout. Don't re-enter before the time-out completes.
-                    if(state.handlingClick) {
+                    if (state.handlingClick) {
                         console.log("you did a thing")
                         return;
                     }
@@ -84,7 +88,7 @@ $(document).ready(function () {
                     // Increase attack power
                     state.status.selectedCharacter.attack += state.status.selectedCharacter.baseAttack;
                     // Don't let foe HP go negative
-                    if(state.status.activeFoe.hp < 0) state.status.activeFoe.hp = 0;
+                    if (state.status.activeFoe.hp < 0) state.status.activeFoe.hp = 0;
                     // Update foe's HP text
                     state.status.activeFoe.updateHpDisplay();
                     // Tell it!
@@ -92,26 +96,26 @@ $(document).ready(function () {
                     state.displayMessage(message);
 
                     var foeDefeated = state.status.activeFoe.hp == 0;
-                    setTimeout(function(){
-                        if(foeDefeated) {
+                    setTimeout(function () {
+                        if (foeDefeated) {
                             // alert("ded");
                             // something
                             state.status.activeFoe.jqElement.addClass("dead");
                             state.displayMessage(state.status.activeFoe.name + " has been defeated!");
                             state.moveToState("opponentDying");
-                        } else { 
+                        } else {
                             // Foe strikes
                             var counterAttack = state.status.activeFoe.counterAttack;
                             state.status.selectedCharacter.hp -= counterAttack;
                             // Don't let HP go negative
-                            if(state.status.selectedCharacter.hp < 0) state.status.selectedCharacter.hp = 0;
+                            if (state.status.selectedCharacter.hp < 0) state.status.selectedCharacter.hp = 0;
                             // Update HP text
                             state.status.selectedCharacter.updateHpDisplay();
                             // Tell it!
                             var counterMessage = state.status.activeFoe.name + " attacks! " + state.status.selectedCharacter.name + " loses " + counterAttack + " HP!";
                             state.displayMessage(counterMessage);
 
-                            if(state.status.selectedCharacter.hp == 0){
+                            if (state.status.selectedCharacter.hp == 0) {
                                 state.status.selectedCharacter.jqElement.addClass("dead");
                                 state.displayMessage(state.status.selectedCharacter.name + " has perished!");
                                 state.displayMessage("Game over.");
@@ -125,27 +129,27 @@ $(document).ready(function () {
             gameOver: {
                 clickableElements: "",
                 hiddenElements: "#heroLabel",
-                onEnter: function (state){
+                onEnter: function (state) {
                     state.displayMessage("newgame");
                 },
-                onClick: function (){},
+                onClick: function () { },
             },
             gameWon: {
                 clickableElements: "",
                 hiddenElements: "#heroLabel #attackButton #versus #foeLabel",
-                onEnter: function (state){
+                onEnter: function (state) {
                     state.displayMessage("newgame");
                 },
-                onClick: function (){},
+                onClick: function () { },
             },
             opponentDying: {
                 clickableElements: "",
                 hiddenElements: "#heroLabel",
-                onEnter: function(state) {
+                onEnter: function (state) {
                     //state.displayMessage("Select your opponent");
-                    setTimeout(function(){
+                    setTimeout(function () {
                         state.game.removeActiveFoe(function () {
-                            if(state.status.livingFoes.length > 0) {
+                            if (state.status.livingFoes.length > 0) {
                                 state.moveToState("selectOpponent");
                             } else {
                                 state.displayMessage("You've defeated all opponents. GREAT SUCCESS!");
@@ -159,13 +163,19 @@ $(document).ready(function () {
             },
         },
 
+        /** The player's selected hero */
         selectedCharacter: null,
-        /** @type {CharacterObj[]} */
+        /** Collection of all characters
+         * @type {CharacterObj[]} */
         characters: [],
+        /** A list of elements that are currently styled as clickable and have associated click handlers */
         clickableElements: [],
+        /** A list of elements that are currently hidden */
         hiddenElements: [],
+        /** A list of messages that are currently being displayed */
         messages: [],
 
+        /** Initializes the game object. */
         initGame: function () {
             // Create character objects
             this.characters.push(new this.Character(0, 10, 5, 80)); // fett
@@ -178,14 +188,15 @@ $(document).ready(function () {
             this.setCurrentGameState(this.gameStates.selectAvatar);
         },
 
-        newGame: function() {
+        /** Resets character stats, UI state, and game state for a new game. */
+        newGame: function () {
             // remove death styles
             this.uiAvatars.removeClass("dead");
-            for(var i = 0; i < this.gameStatus.allFoes.length; i++) {
+            for (var i = 0; i < this.gameStatus.allFoes.length; i++) {
                 this.animateCharToElement(this.gameStatus.allFoes[i], this.uiHeroContainer, null, true);
             }
-            
-            for(var i = 0; i < this.characters.length; i++) {
+
+            for (var i = 0; i < this.characters.length; i++) {
                 this.characters[i].reset();
             }
 
@@ -201,60 +212,64 @@ $(document).ready(function () {
          * @property {Object} status - rpgGame.gameStatus object
          */
 
+        /** Performs additional initialization on GameState objects, assigning standard properties and functions. */
         initStates: function () {
-            
+
             var self = this;
 
             // Iterate over game states
-            Object.getOwnPropertyNames(this.gameStates).forEach(function(stateName){
+            Object.getOwnPropertyNames(this.gameStates).forEach(function (stateName) {
                 var state = this.gameStates[stateName];
-                
-                 // Assign additional properties not defined above
-                 state.name = stateName;
-                 state.game = this;
-                 // functions
-                 state.moveToState = setNextState;
-                 state.displayMessage = displayMessage;
-                 state.status = self.gameStatus;
-                 //state.shrinkCharacter = shrinkCharacter;
-                 //state.growCharacter = growCharacter;
-            }, this); 
+
+                // Assign additional properties not defined above
+                state.name = stateName;
+                state.game = this;
+                // functions
+                state.moveToState = setNextState;
+                state.displayMessage = displayMessage;
+                // objects
+                state.status = self.gameStatus;
+            }, this);
 
             /** Member function to be added to GameState objects. Advances the game to the specified state. */
             function setNextState(strState) {
                 self.setCurrentGameState(self.gameStates[strState]);
             }
 
+            /** Member function to be added to GameState objects. Displays the specified message.. */
             function displayMessage(msg, character) {
                 self.displayMessage(msg, character);
             }
-            
+
 
         },
 
-        removeActiveFoe: function(callback) {
+        /** Animates the active foe off the page and into a hidden div */
+        removeActiveFoe: function (callback) {
             var self = this;
 
-            this.animateCharToElement(this.gameStatus.activeFoe, this.uiDeadCharacterBench, function() {
+            this.animateCharToElement(this.gameStatus.activeFoe, this.uiDeadCharacterBench, function () {
                 // Move foe from living foes to dead foes
                 var iFoe = self.gameStatus.livingFoes.indexOf(self.gameStatus.activeFoe);
                 self.gameStatus.livingFoes.splice(iFoe, 1);
                 self.gameStatus.deadFoes.push(self.gameStatus.activeFoe);
 
                 self.gameStatus.activeFoe = null;
-                if(callback) callback();
+                if (callback) callback();
             });
         },
 
+        /** Animates the specified character down to a size of (0,0) */
         shrinkCharacter: function (char, callback) {
             var element = char.jqElement;
             // Cache original size so we can grow back to that
             char.autoWidth = char.autoWidth || element.width();
             char.autoHeight = char.autoHeight || element.height();
-            element.animate({width: 0, height: 0}, 200, callback);
+            element.animate({ width: 0, height: 0 }, 200, callback);
         },
+        /** Animates the specified character up to it's original size prior to the first call to shrinkCharacter. */
         growCharacter: function (char, callback) {
-            char.jqElement.animate({width: char.autoWidth + "px", height: char.autoHeight + "px"}, 200, callback);
+            char.jqElement.animate({ width: char.autoWidth + "px", height: char.autoHeight + "px" }, 200, callback);
         },
         /** @typedef {Object} CharacterObj 
          * @prop {number} index - Index of the character in the rpgGame.characters array
@@ -300,16 +315,19 @@ $(document).ready(function () {
             this.hpDisplayString = function () {
                 return this.isDead() ? "0" : this.hp.toString();
             }
-            this.updateHpDisplay = function() {
+            this.updateHpDisplay = function () {
                 this.hpDisplay.text(this.hp + " HP");
             }
-            
+
 
             this.reset();
             this.updateHpDisplay();
             return this;
         },
 
+        /** Sets the specified avatar as the player's character. Other characters become foes. gameStatus is updated accordingly
+         * and foes are animated into the foe div.
+         */
         setSelectedAvatar: function (avatarElement, callback) {
             this.gameStatus.allFoes.length = 0;
             this.gameStatus.livingFoes.length = 0;
@@ -318,7 +336,7 @@ $(document).ready(function () {
 
             // Add/remove the .foe class as applicable
             for (var i = 0; i < this.characters.length; i++) {
-                if(this.characters[i].element == avatarElement) {
+                if (this.characters[i].element == avatarElement) {
                     this.selectedCharacter = this.characters[i];
                     this.gameStatus.selectedCharacter = this.selectedCharacter;
                     this.selectedCharacter.jqElement.removeClass("foe");
@@ -329,27 +347,33 @@ $(document).ready(function () {
                 }
             }
 
-            if(!this.selectedCharacter) throw("Specified element not found in character list");
+            if (!this.selectedCharacter) throw ("Specified element not found in character list");
+
+            // We only want to call the specified callback once.
             var first = true;
 
             this.gameStatus.allFoes.forEach(function (foe) {
                 // We'll pass our callback to the first animation
                 this.animateCharToElement(foe, this.uiFoeContainer, first ? callback : undefined);
-                first = false;
+                first = false; // Don't call the callback on second or subsequent foes.
             }, this);
 
         },
 
+        /** Animates the specified foe into the "versus" pane, and sets him as the active foe in the gameStatus */
         setSelectedOpponent: function (avatarElement, callback) {
             this.gameStatus.activeFoe = this.getCharacterByElement(avatarElement);
             this.animateCharToElement(this.gameStatus.activeFoe, this.uiOpponentBox, callback);
         },
 
-        getCharacterByElement: function(element) {
-            if(element instanceof jQuery) element = element[0];
+        /** Returns the Character object associated with the specified .avatar element */
+        getCharacterByElement: function (element) {
+            // If it's a jQuery object, we want to get the wrapped HTMLElement
+            if (element instanceof jQuery) element = element[0];
 
+            // Loop over characters until we find the right one.
             for (var i = 0; i < this.characters.length; i++) {
-                if(this.characters[i].element == element) {
+                if (this.characters[i].element == element) {
                     return this.characters[i];
                 }
             }
@@ -367,12 +391,12 @@ $(document).ready(function () {
             var self = this;
 
             // If specified element is jQuery object, get the native HTMLElement
-            if(!(element instanceof jQuery)) element = $(element);
+            if (!(element instanceof jQuery)) element = $(element);
 
             // First shrink
-            this.shrinkCharacter(char, function() {
+            this.shrinkCharacter(char, function () {
                 // Then move
-                if(prepend) {
+                if (prepend) {
                     element.prepend(char.element);
                 } else {
                     element.append(char.element);
@@ -386,85 +410,88 @@ $(document).ready(function () {
          * @param {string} msg - The message to display, or "newgame" to display a link that can be clicked to start a new game
          * @param {CharacterObj} character - A character whose image is to be displayed next to the txt, or null
          */
-        displayMessage: function(msg, character){
+        displayMessage: function (msg, character) {
             var self = this;
             var newImage = null;
 
-            if(character){
+            // If there is a character associated with the message, create an <img> tag containing his "head" image
+            if (character) {
                 var src = character.jqElement.find(".avatarHead").attr("src");
                 newImage = $("<img>").attr("src", src)
             }
 
+            // Create the message <div>
             var newMessage = $("<div class='outputItem'>")
-            if(msg == "newgame") {
+            if (msg == "newgame") {
+                // If the message is "newgame", we'll actually create a link the player can click to start a new game.
                 var link = $("<a href='#'>");
                 link.text("Click to play again.");
-                link.on("click", function(event) {
-                    event.preventDefault();
+                link.on("click", function (event) {
+                    event.preventDefault(); // DONT scroll to top of page
 
                     var $this = $(this);
                     // don't let link be clicked more than once
-                    if(!$this.data("used")) {
+                    if (!$this.data("used")) { // if the <img> is 'tagged', it's already been clicked
                         self.newGame();
-                        $this.data("used", "used");
+                        $this.data("used", "used"); // 'tag' the <img> tag when it's clicked
                     }
                 });
                 newMessage.append(link);
             } else {
+                // The far simpler case: just slap some text in our <div>
                 newMessage.text(" " + msg);
             }
 
-            if(newImage) newMessage.prepend(newImage);
+            // Insert the character's face into the <div> if applicable
+            if (newImage) newMessage.prepend(newImage);
+            // Start with opacity: 0 so we can fade in
             newMessage.css("opacity", 0);
+            // Add it to DOM
             this.uiOutputBox.append(newMessage);
             this.messages.push(newMessage);
-            newMessage.animate({opacity: 1}, 250); //, 
-                // function() {
-                // self.cullMessages()}
-                // );
+            // Fade it in
+            newMessage.animate({ opacity: 1 }, 250);
+            // Remove any messages if we've exceeded the max number of messages
             self.cullMessages();
         },
 
-        cullMessages: function() {
-            if(this.messages.length > this.maxMessageCount) {
+        /** Removes one message from the game output if there are more messages than allowed (as specified by this.maxMessageCount) */
+        cullMessages: function () {
+            if (this.messages.length > this.maxMessageCount) {
                 var msg = this.messages[0];
                 this.messages.shift();
-                msg.animate({height: 0, margin: 0, padding: 0}, 100, function() {
+                msg.animate({ height: 0, margin: 0, padding: 0 }, 100, function () {
                     msg.remove();
                 });
             }
         },
-        // /** Creates a game state objects
-        //  *  @constructor
-        //  *  @param {string} clickableElements - A space-separated list of .classes or #ids that will raise the click event 
-        //  */
-        // GameState: function(clickableElements, onClick) {
-        //     //@ts-ignore -- this refers to a GameState
-        //     this.clickableElements = clickableElements;
-
-        // },
-
-        // testGameState: new this.GameState(".avatar"), 
-        // Todo: put all these directly into the gamestate object, and have the gamestate init function just add methods (and whatever else it may end up doing)
 
 
+        /** Sets the current gamestate. UI will be updated with regards to clickable and hidden elements, and onEnter and onLeave
+         * methods will be called on GameStatus objects as necessary.
+         */
         setCurrentGameState: function (state) {
-            if(this.currentGameState) {
-                if(this.currentGameState.onLeave) this.currentGameState.onLeave(this.currentGameState);
+            // Leave current game state
+            if (this.currentGameState) {
+                if (this.currentGameState.onLeave) this.currentGameState.onLeave(this.currentGameState);
             }
 
+            // Update styles and click handlers
             this.currentGameState = state;
-            if(this.currentGameState) {
+            if (this.currentGameState) {
                 this.setClickableElements(state.clickableElements || "");
                 this.setHiddenElements(state.hiddenElements || "");
-                if(this.currentGameState.onEnter) this.currentGameState.onEnter(this.currentGameState);
-            }else{
+
+                // Enter new game state
+                if (this.currentGameState.onEnter) this.currentGameState.onEnter(this.currentGameState);
+            } else {
                 this.setClickableElements(""); // none
             }
         },
 
+        /** Shows any previously hidden elements and hides elements as identfied by the specified space-separated list of IDs and classes */
         setHiddenElements: function (elements) {
-       var that = this;
+            var that = this;
 
             // Remove clickable items
             this.hiddenElements.forEach(function (i) {
