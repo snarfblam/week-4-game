@@ -45,12 +45,13 @@ h3 {
 }
 
 #heroLabel, #foeLabel {
-    /* padding-top: 20px;  */
-    padding-bottom: 10px;
+    padding-top: 20px; 
+    /* padding-bottom: 10px; */
+    text-align: center;
 }
 
 #heroContainer, #foeContainer {
-    padding-top: 20px;
+    /* padding-top: 20px; */
     text-align: center;
 }
 
@@ -91,10 +92,13 @@ h3 {
     padding-top: 5px;
 }
 
-.avatar, #opponentBox {
+.avatar {
 
     display: inline-block;
     padding: 5px;
+}
+#opponentBox {
+    display: inline-block;
 }
 
 
@@ -200,4 +204,9 @@ button {
 
 .hiddenItem {
     display: none !important;
+}
+
+a {
+    color: white;
+    text-shadow: 1px 1px 1px black, -1px -1px 1px black;
 }

@@ -70,9 +70,13 @@ $(document).ready(function () {
                 },
                 onClick: function (state, e) {
                     // This handler uses a timeout. Don't re-enter before the time-out completes.
-                    if(state.handlingClick) return;
+                    if(state.handlingClick) {
+                        console.log("you did a thing")
+                        return;
+                    }
 
                     // Fighting happens!
+                    state.handlingClick = true;
 
                     // Player strikes
                     var attack = state.status.selectedCharacter.attack;
@@ -165,12 +169,26 @@ $(document).ready(function () {
         initGame: function () {
             // Create character objects
             this.characters.push(new this.Character(0, 10, 5, 80)); // fett
-            this.characters.push(new this.Character(1, 4, 8, 100)); // solo
-            this.characters.push(new this.Character(2, 3, 12, 150)); // vader
-            this.characters.push(new this.Character(3, 6, 15, 180)); // yoda
+            this.characters.push(new this.Character(1, 6, 8, 100)); // solo
+            this.characters.push(new this.Character(2, 2, 12, 150)); // vader
+            this.characters.push(new this.Character(3, 1, 15, 190)); // yoda
 
             this.initStates();
             //var gs = new this.GameState("#versus .avatar");
+            this.setCurrentGameState(this.gameStates.selectAvatar);
+        },
+
+        newGame: function() {
+            // remove death styles
+            this.uiAvatars.removeClass("dead");
+            for(var i = 0; i < this.gameStatus.allFoes.length; i++) {
+                this.animateCharToElement(this.gameStatus.allFoes[i], this.uiHeroContainer, null, true);
+            }
+            
+            for(var i = 0; i < this.characters.length; i++) {
+                this.characters[i].reset();
+            }
+
             this.setCurrentGameState(this.gameStates.selectAvatar);
         },
 
@@ -231,8 +249,8 @@ $(document).ready(function () {
         shrinkCharacter: function (char, callback) {
             var element = char.jqElement;
             // Cache original size so we can grow back to that
-            char.autoWidth = element.width();
-            char.autoHeight = element.height();
+            char.autoWidth = char.autoWidth || element.width();
+            char.autoHeight = char.autoHeight || element.height();
             element.animate({width: 0, height: 0}, 200, callback);
         },
         growCharacter: function (char, callback) {
@@ -274,6 +292,7 @@ $(document).ready(function () {
             this.reset = function () {
                 this.attack = this.baseAttack;
                 this.hp = this.initialHp;
+                this.updateHpDisplay();
             };
             this.isDead = function () {
                 return this.hp >= 0;
@@ -342,8 +361,9 @@ $(document).ready(function () {
          * @param {CharacterObj} char - The character to be moved
          * @param {any} element - The element to move the character to (HTMLElement or jQuery)
          * @param {Function} [callback] - optional callback for when the animation is complete
+         * @param {boolean} [prepend] - optional. if true, the element will be prepended instead of appended
         */
-        animateCharToElement: function (char, element, callback) {
+        animateCharToElement: function (char, element, callback, prepend) {
             var self = this;
 
             // If specified element is jQuery object, get the native HTMLElement
@@ -352,7 +372,11 @@ $(document).ready(function () {
             // First shrink
             this.shrinkCharacter(char, function() {
                 // Then move
-                element.append(char.element);
+                if(prepend) {
+                    element.prepend(char.element);
+                } else {
+                    element.append(char.element);
+                }
                 // And finally grow
                 self.growCharacter(char, callback);
             });
@@ -375,8 +399,15 @@ $(document).ready(function () {
             if(msg == "newgame") {
                 var link = $("<a href='#'>");
                 link.text("Click to play again.");
-                link.on("click", function(){
-                    self.newGame();
+                link.on("click", function(event) {
+                    event.preventDefault();
+
+                    var $this = $(this);
+                    // don't let link be clicked more than once
+                    if(!$this.data("used")) {
+                        self.newGame();
+                        $this.data("used", "used");
+                    }
                 });
                 newMessage.append(link);
             } else {
