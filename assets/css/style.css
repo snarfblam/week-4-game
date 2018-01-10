@@ -1,152 +1,199 @@
+
 @import url('https://fonts.googleapis.com/css?family=Orbitron');
 
-html {
-    height: 100%;
-    font-family: Orbitron;
-    background: url("../images/Sky.png");
-    background-size: auto 100%;
-    background-repeat: repeat;
-    background-origin: border-box;
-}
+/* General page/element styles */
+    html {
+        height: 100%;
+        font-family:  Orbitron, "Lucida Console", Consolas, monospace;
+        background: url("../images/Sky.png");
+        background-size: auto 100%;
+        background-repeat: repeat;
+        background-origin: border-box;
+    }
 
-body {
-    height: 100%;
-    /* max-width: 800px; */
-    /* margin: 0 auto; */
-    position: relative;
-    color: white;
-    /* padding: 10px; */
-    font-family: Orbitron;
-}
+    body {
+        height: 100%;
+        position: relative;
+        color: white;
+        font-family:  Orbitron, "Lucida Console", Consolas, monospace;
+    }
 
-.mainContainer {
-    max-width: 800px;
-    margin: 0 auto;
-}
+    /* Limits content width */
+    .mainContainer {
+        max-width: 800px;
+        margin: 0 auto;
+    }
 
-.title {
-    color: orange;
-    margin: 0 auto;
-    text-align: center;
-    font-weight: bold;
-}
+    .title {
+        color: orange;
+        margin: 0 auto;
+        text-align: center;
+        font-weight: bold;
+    }
 
-hr {
-    border-color: orange;
-    width: 500px;
-}
+    hr {
+        border-color: orange;
+        width: 500px;
+    }
 
-h1 {
-    font-size: 3rem;
-}
+    h1 {
+        font-size: 3rem;
+    }
 
-h3 {
-    font-size: 2rem;
-}
+    h3 {
+        font-size: 2rem;
+    }
 
-#heroLabel, #foeLabel {
-    padding-top: 20px; 
-    /* padding-bottom: 10px; */
-    text-align: center;
-}
+    button {
+        background: white;
+        color: black;
+        padding: 10px;
+        border: 1px white solid;
+        outline: 2px black solid;
+        outline-offset: -5px;
+        font-family: inherit;
+        font-size: 1.5rem;
+    }
 
-#heroContainer, #foeContainer {
-    /* padding-top: 20px; */
-    text-align: center;
-}
+/* Hero/Foe/Dead character containers and labels */
 
-.hpDisplay, .avatarLabel {
-    background: white;
-    color: black;
-    text-align: center;
-    padding-bottom: 5px;
-    font-weight: bold;
-}
+    #heroLabel, #foeLabel {
+        padding-top: 20px; 
+        text-align: center;
+    }
 
-#versus {
-    /* display: inline-block; */
-    text-align: center;
-    vertical-align: middle;
-    line-height: 2em;
-    /* transform: translateY(-75px);  */
-    padding-left: 20px;
-    padding-right: 20px;
-    background: black;
-    border-radius: 10px;
-    margin-bottom: 40px;
-}
+    #heroContainer, #foeContainer {
+        text-align: center;
+    }
+        
+    #foeContainer {
+        margin-top: 0; /* 2rem; */
+    }
+    #opponentBox {
+        display: inline-block;
+    }
+
+    #deadCharacterBench {
+        display: none;
+    }
+
+/* Character Cards */
+
+    .hpDisplay, .avatarLabel {
+        background: white;
+        color: black;
+        text-align: center;
+        padding-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .hpDisplay {
+        padding-bottom: 5px;
+    }
+
+    .hpDisplay, .avatarLabel {
+        padding-top: 5px;
+    }
+
+    .avatar {
+        display: inline-block;
+        padding: 5px;
+    }
+
+    .avatar img, #opponentBox img {
+        width: 150px;
+        height: 150px;
+        padding: 5px;
+        border: 4px white solid;
+        outline: 5px black solid;
+        outline-offset: -9px;
+        box-sizing: border-box;
+        overflow: visible;
+        display: block;
+    }
+
+    .dead img, #opponentBox .dead img {
+        border: 4px solid red;
+    }
+
+    .dead p {
+        background: red;
+    }
+
+    /* .avatarHead elements contain hidden images to be used in status messages */
+    .avatar .avatarHead, #opponentBox .avatarHead {
+        display: none;
+    }
+
+/* Versus Pane */
+
+    .versusPane {
+        display: inline-block;
+        margin-bottom: 20px;
+        /* This prevents the div from being positioned based on the base-line text of the button: */
+        overflow: hidden;
+    }
+
+    #versus {
+        text-align: center;
+        vertical-align: middle;
+        line-height: 2em;
+        padding-left: 20px;
+        padding-right: 20px;
+        background: black;
+        border-radius: 10px;
+        margin-bottom: 40px;
+    }
+
+    #attackButton {
+        /* margin-left: 30px; */
+        margin-top: 10px;
+        cursor: pointer;
+    }
+
+    #attackButton:disabled {
+        cursor: default;
+        color: gray;
+    }
+
+    #attackButton:hover {
+        background: rgb(255, 224, 166);
+    }
+
+    #attackButton:active {
+        background: orange;
+    }
 
 
 
-.versusPane {
-    display: inline-block;
-    margin-bottom: 20px;
-    /* This prevents the div from being positioned based on the base-line text of the button: */
-    overflow: hidden;
-}
-.hpDisplay {
-    padding-bottom: 5px;
-}
+/* Status messages */
 
-.hpDisplay, .avatarLabel {
-    padding-top: 5px;
-}
+    .outputItem {
+        background: rgba(24, 24, 24, 0.75);
+        color: orange;
+        border: 1px black;
+        border-radius: 5px;
+        padding: 5px;
+        /* white-space: nowrap; */
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+        line-height: 1.5em;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+        box-sizing: border-box;
+    }
 
-.avatar {
+    .outputItem img {
+        vertical-align: bottom;
+        height: 24px; 
+    }
 
-    display: inline-block;
-    padding: 5px;
-}
-#opponentBox {
-    display: inline-block;
-}
+    .outputItem a {
+        color: white;
+        text-shadow: 1px 1px 1px black, -1px -1px 1px black;
+    }
 
-
-.avatar img, #opponentBox img {
-    width: 150px;
-    height: 150px;
-    padding: 5px;
-    border: 4px white solid;
-    outline: 5px black solid;
-    outline-offset: -9px;
-    box-sizing: border-box;
-    overflow: visible;
-    display: block;
-}
-
-
-.dead img, #opponentBox .dead img {
-    border: 4px solid red;
-}
-
-.dead p {
-    background: red;
-}
-
-#deadCharacterBench {
-    display: none;
-}
-/* .gone {
-    width: 0;
-    height: 0;
-    overflow: hidden;
-    transition: width 2s, height 2s;
-} */
-
-
-
-.avatar .avatarHead, #opponentBox .avatarHead {
-    display: none;
-}
-
-.outputItem img {
-    vertical-align: bottom;
-    height: 24px; 
-}
-
-#foeContainer {
-    margin-top: 0; /* 2rem; */
-}
 
 .deathstarDecoration {
     position: absolute;
@@ -155,58 +202,16 @@ h3 {
     z-index: -1;
 }
 
-button {
-    background: white;
-    color: black;
-    padding: 10px;
-    border: 1px white solid;
-    outline: 2px black solid;
-    outline-offset: -5px;
-    font-family: inherit;
-    font-size: 1.5rem;
-}
 
-#attackButton {
-    /* margin-left: 30px; */
-    margin-top: 10px;
-    cursor: pointer;
-}
-#attackButton:disabled {
-    cursor: default;
-    color: gray;
-}
-#attackButton:hover {
-    background: rgb(255, 224, 166);
-}
-#attackButton:active {
-    background: orange;
-}
 
-.outputItem {
-    background: rgba(24, 24, 24, 0.75);
-    color: orange;
-    border: 1px black;
-    border-radius: 5px;
-    padding: 5px;
-    /* white-space: nowrap; */
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-    line-height: 1.5em;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-    box-sizing: border-box;
-}
+/* Applied by javascript to give an item a hand cursor */
 
-.clickableItem {
-    cursor: pointer;
-}
+    .clickableItem {
+        cursor: pointer;
+    }
 
-.hiddenItem {
-    display: none !important;
-}
+/* Applies by javascript to hide an item */
 
-a {
-    color: white;
-    text-shadow: 1px 1px 1px black, -1px -1px 1px black;
-}
+    .hiddenItem {
+        display: none !important;
+    }

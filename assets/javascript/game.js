@@ -512,6 +512,8 @@ $(document).ready(function () {
 
         },
 
+        /** Associates the click events of the specified elements (space-separated list of #IDs and .classes) 
+         * with the onClick method of  the current GameState object*/
         setClickableElements: function (elements) {
             var that = this;
 
@@ -533,12 +535,16 @@ $(document).ready(function () {
 
             elementArray.forEach(function (e) {
                 var elem = $(e);
+                // Handle click event
                 elem.on("click", clickHandler);
+                // Give clickable style
                 elem.addClass("clickableItem");
+                // Disable buttons
                 elem.prop("disabled", false);
                 that.clickableElements.push(elem);
             });
 
+            /** Generic click handler that routes click events to the currentGameState.onClick method */
             function clickHandler(e) {
                 if (that.currentGameState.onClick) {
                     that.currentGameState.onClick.call(this, that.currentGameState, e);
@@ -552,7 +558,7 @@ $(document).ready(function () {
     game.initGame();
 });
 
-/*
+/*  OLD STUFF:
 
     Game flow will be represented by GameState objects. 
         - Each GameState will be referenced by an ID string
