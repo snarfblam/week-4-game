@@ -4,4 +4,6 @@ If you're a fan of *Press Space To Win* you just might enjoy *Star Wars Battle*.
 
 ### Instructions
 
+Play the game on [GitHub Pages](https://snarfblam.github.io/week-4-game/).
+
 Click a character to select your hero. Then select a foe. Keep clicking **Attack** until somenoe dies. If that someone isn't you, select another foe to battle. Repeat the process and hope for victory.
